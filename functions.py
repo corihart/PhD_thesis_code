@@ -192,8 +192,14 @@ def model_results_overview(model, solut, objective_reaction, rounding_nr=5, link
             elif rxn.id.endswith(linker_tag2):
                 linker_flux_dict[linker_id][1] = round(rxn.flux, rounding_nr)
 
+    sum_of_fluxes = 0
+    for flux in solut:
+        sum_of_fluxes += abs(flux)
+    
+
+
     print(f"Photon uptake = {round(model.reactions.get_by_id('Photon_tx'+light_tag).flux, 4)}   % of allowed Photon uptake = {round((model.reactions.get_by_id('Photon_tx'+light_tag).flux/model.reactions.get_by_id('Photon_tx'+light_tag).upper_bound)*100, 2)}")
-    print(f"Output rate ({objective_reaction}) {round(model.reactions.get_by_id(objective_reaction).flux, 4)}\t\tsum of fluxes: {round(solut.objective_value, 4)}")
+    print(f"Output rate ({objective_reaction}) {round(model.reactions.get_by_id(objective_reaction).flux, 4)}\t\tsum of fluxes: {round(sum_of_fluxes, 4)}")
     print(f"gas exchange = Day: {round(model.reactions.get_by_id('CO2_tx'+light_tag).flux, 5)} Night: {round(model.reactions.get_by_id('CO2_tx'+dark_tag).flux, 5)}")
     if model.reactions.get_by_id('CO2_tx'+dark_tag).flux <= 0:
         CCE = calculate_CCE(model)
@@ -919,6 +925,7 @@ def plot_accum(model, objective_reaction, dataframe, threshold, growth_rate, CO2
     ax3.plot(results, dataframe.loc["RXN0_5224_c_12"], label="carb anhyd_c night")
     ax3.plot(results, dataframe.loc["PEPCARBOX_RXN_c_12"],"--", label="PEPC_c night")
     ax3.plot(results, dataframe.loc["PEPCARBOX_RXN_c_00"],"--", label="PEPC_c day")
+
     # ax3.plot(results, dfx.loc["PEPCARBOXYKIN_RXN_c_12"], label="PEPCkinase_c night")
 
     ax3.axhspan(CO2_day_rate[0], CO2_day_rate[1], color='gray', alpha=0.3, lw=0)
@@ -982,6 +989,7 @@ def plot_accum(model, objective_reaction, dataframe, threshold, growth_rate, CO2
     ax2.set_ylim((lim2_x, lim2_y))
     ax3.set_ylim((lim3_x,lim3_y))
     ax5.set_ylim((lim5_x,lim5_y))
+
 
 
 
