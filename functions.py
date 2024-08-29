@@ -273,7 +273,9 @@ def calc_carbon_flux(model, output_string="Marchantia_biomass", night_tag = "_12
     
     # Print night CCE
     cce_night = abs(carbon_biomass_dict[model.reactions.get_by_id(output_string + "_12").id]) / day_to_night_carbons
-    print("night CCE:", cce_night)
+    print("night CCE1 (carbon in to biomass):", cce_night)
+    cce_night2 =  1 + (model.reactions.CO2_tx_12.flux / day_to_night_carbons)
+    print("night CCE2 (1 - (carbon lost / carbon in)):", cce_night2)
 
     carbon_flux_dict = {"CO2 daytime exchange": model.reactions.CO2_tx_00.flux,
                         "CO2 nightime exchange": model.reactions.CO2_tx_12.flux,
@@ -286,7 +288,8 @@ def calc_carbon_flux(model, output_string="Marchantia_biomass", night_tag = "_12
                         "total CCE": CCE,
                         "nCO2RC": nCO2RC,
                         "% nCO2R": nCO2RC * 100,
-                        "night CCE": cce_night}
+                        "night CCE1": cce_night,
+                        "night CCE2: ": cce_night2}
 
     # create a pandas dataframe from the dictionary
     carbon_flux_df = pd.DataFrame.from_dict(carbon_flux_dict, orient='index', columns=['value'])
