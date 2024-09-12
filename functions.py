@@ -2452,3 +2452,16 @@ def plot_night_carbon_fluxes(metrics_df):
     ax2.legend(loc='upper right')
 
     plt.show()
+
+
+##################################
+    
+def save_model_and_fluxes_json(model, solution, file_name):
+    import json
+
+    # save the model as JSON
+    cobra.io.save_json_model(model, json_file_name+".json")
+
+    # save a single flux vector as JSON
+    with open(json_file_name+"_fluxes.json", 'w') as f:
+        json.dump(sol.fluxes.to_dict(), f)
