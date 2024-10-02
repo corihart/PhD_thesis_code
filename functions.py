@@ -515,7 +515,7 @@ def calculate_CO2_refixation_coefficient(model, verbose=False, threshold = 0.000
 #########################################
 
 def parameter_scan_CO2(model, objective, process, start, stop, stepsize, pFBA, CO2_refixation_allowed=True, verbose=False, iterations=10, 
-                       double_ub = False, m=0.01025582745716949, b =-0.01170011252656307):
+                       double_ub = False, m=0.01025582745716949, b =-0.01170011252656307, scan_ub_and_lb = False):
     solution_dict = {}
     
     # make list of all reactions to save in the dataframe
@@ -523,7 +523,16 @@ def parameter_scan_CO2(model, objective, process, start, stop, stepsize, pFBA, C
     for rxn in model.reactions:
         rxn_list.append(rxn.id)
     # add other metrics to save in dataframe
-    metrics_list = ["noct. CO2 coeff.", "CCE", "sum of fluxes", "photon use", "growth rate ub", "photon use ub", "daytime CO2 uptake ub", "scan process ub", "total aa day", "total aa night"]
+    metrics_list = ["noct. CO2 coeff.", 
+                    "CCE", 
+                    "sum of fluxes", 
+                    "photon use", 
+                    "growth rate ub", 
+                    "photon use ub", 
+                    "daytime CO2 uptake ub", 
+                    "scan process ub", 
+                    "total aa day", 
+                    "total aa night"]
     for metric in metrics_list:
         rxn_list.append(metric)
         
@@ -551,8 +560,10 @@ def parameter_scan_CO2(model, objective, process, start, stop, stepsize, pFBA, C
 
                     solution_temp, opt_model = optimise_model(temp_model, objective, pFBA)
                 else:
-                
-                    temp_model.reactions.get_by_id(process).bounds = (0, scan_value)
+                    if scan_ub_and_lb:
+                        temp_model.reactions.get_by_id(process).bounds = (scan_value, scan_value)
+                    else:
+                        temp_model.reactions.get_by_id(process).bounds = (0, scan_value)
 
                     solution_temp, opt_model = optimise_model(temp_model, objective, pFBA)
             else:
@@ -2460,8 +2471,8 @@ def save_model_and_fluxes_json(model, solution, file_name):
     import json
 
     # save the model as JSON
-    cobra.io.save_json_model(model, json_file_name+".json")
+    cobra.io.save_json_model(model, file_name+".json")
 
     # save a single flux vector as JSON
-    with open(json_file_name+"_fluxes.json", 'w') as f:
-        json.dump(sol.fluxes.to_dict(), f)
+    with open(file_name+"_fluxes.json", 'w') as f:
+        json.dump(solution.fluxes.to_dict(), f)
