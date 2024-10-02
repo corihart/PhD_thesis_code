@@ -532,7 +532,8 @@ def parameter_scan_CO2(model, objective, process, start, stop, stepsize, pFBA, C
                     "daytime CO2 uptake ub", 
                     "scan process ub", 
                     "total aa day", 
-                    "total aa night"]
+                    "total aa night",
+                    "nighttime CCE"]
     for metric in metrics_list:
         rxn_list.append(metric)
         
@@ -632,6 +633,11 @@ def parameter_scan_CO2(model, objective, process, start, stop, stepsize, pFBA, C
                         
 
             solution_dict[count]= solution_temp
+
+            #nighttime CCE
+            day_to_night_carbons  = sum(rxn.flux * rxn.reactants[0].elements.get("C", 0) for rxn in model.reactions if "linker_00_to_12" in rxn.id)
+            night_CCE = 1 + (opt_model.reactions.CO2_tx_12.flux / day_to_night_carbons)
+            fluxes_list.append(night_CCE)
         
         #name model iteration after current scan value
         column_name = str(round(scan_value, 3))
